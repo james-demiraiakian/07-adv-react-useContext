@@ -1,13 +1,22 @@
-import React, { createContext, useContext, useMemo, useState } from 'react'
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import fetchUser from '../services/user'
 
 export const UserContext = createContext()
 
 const UserProvider = ({ children }) => {
-  const [user, setUser] = useState('')
+  const [user, setUser] = useState({})
 
-  const value = useMemo(() => ({ user, setUser }), [user])
+  useEffect(() => {
+    fetchUser()
+      .then((fetchedUser) => {
+        setUser(fetchedUser)
+      })
+      .catch((error) => {
+        throw new Error(`Error: ${error}`)
+      })
+  }, [])
 
-  return <UserContext.Provider value={value}>{children}</UserContext.Provider>
+  return <UserContext.Provider value={{ user }}>{children}</UserContext.Provider>
 }
 
 const useUser = () => {
@@ -19,3 +28,5 @@ const useUser = () => {
 
   return context
 }
+
+export { UserProvider, useUser }
